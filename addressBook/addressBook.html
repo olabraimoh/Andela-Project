@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Address</title>
+    <meta charset="UTF-8">
+    <link href="addressPot.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    
+    <script>
+        var contactsArray = [];
+        var selectedIndex = -1;
+        
+        function init() {
+            document.getElementById("tablerows").innerHTML = "";
+            if (localStorage.contactsForm) {
+                contactsArray = JSON.parse(localStorage.contactsForm);
+                for (var i = 0; i < contactsArray.length; i++) {
+                    prepareTableCell(i, contactsArray[i].name, contactsArray[i].phone, contactsArray[i].email);
+                }
+            }
+        }
+            
+        function onSubmitPress() {
+            var fullName = document.getElementById("name").value;
+            var phoneNumber = document.getElementById("phone").value;
+            var emailAddress = document.getElementById("email").value;
+            var contactsObj = {name: fullName, phone: phoneNumber, email: emailAddress};
+            if (selectedIndex === -1) {
+                contactsArray.push(contactsObj);
+            } else {
+                contactsArray.splice(selectedIndex, 1, contactsObj);
+            }
+            localStorage.contactsForm = JSON.stringify(contactsArray);
+            init();
+            onClearPress();
+        }
+        
+        function prepareTableCell(index, fullName, phoneNumber, emailAddress) {
+            var table = document.getElementById("tablerows");
+            var row = table.insertRow();
+            var fullNameCell = row.insertCell(0);
+            var phoneNumberCell = row.insertCell(1);
+            var emailAddressCell = row.insertCell(2);
+            var actionCell = row.insertCell(3);
+            fullNameCell.innerHTML = fullName;
+            fullNameCell.className='full_name';
+            phoneNumberCell.innerHTML = phoneNumber;
+            emailAddressCell.innerHTML = emailAddress;
+            actionCell.innerHTML = '<button onclick="onEditPress(' + index + ')">Edit</button><br/><button onclick="deleteTableRow(' + index + ')">Delete</button>';
+            $(phoneNumberCell).hide();
+            $(emailAddressCell).hide();
+        }
+        
+        function deleteTableRow(index) {
+            contactsArray.splice(index, 1);
+            localStorage.contactsForm = JSON.stringify(contactsArray);
+            init();
+        }
+            
+        function onClearPress() {
+            selectedIndex = -1;
+            document.getElementById("name").value = "";
+            document.getElementById("phone").value = "";
+            document.getElementById("email").value = "";
+            document.getElementById("submit").innerHTML = "Submit";
+        }
+            
+        function onEditPress(index) {
+            selectedIndex = index;
+            var contactsObj = contactsArray[index];
+            document.getElementById("name").value = contactsObj.name;
+            document.getElementById("phone").value = contactsObj.phone;
+            document.getElementById("email").value = contactsObj.email;
+            document.getElementById("submit").innerHTML = "Update";
+        }
+
+        $(document).ready(function () {
+            $('.full_name').on('click', function() {
+                if ($($(this).siblings()[1]).is(':visible'))
+                {
+                    $($(this).siblings()[0]).hide();
+                    $($(this).siblings()[1]).hide();
+                } else {
+                     $(this).siblings().show();
+                }
+                console.log('calling');
+                
+            });
+        });
+        
+    </script>
+
+</head>
+<body onload="init()">
+<header class="headerBar"><h1>Address Book</h1></header>
+<div id="containment">
+    <form id="addressBook">
+    <div>
+        <label for="name"><strong>Full Name:</strong></label><br>
+        <input id="name" type="text" placeholder="enter your name here...">        
+    </div>
+    <div>    
+        <br><label for="phone"><strong>Phone number:</strong></label><br>
+        <input id="phone" type="text" placeholder="enter your phone number here...">        
+    </div>
+    <div>
+        <br><label for="email"><strong>Email Address:</strong></label><br>
+        <input id="email" type="text" placeholder="enter your email address here...">        
+    </div>
+    <div>
+        <br><button id="submit" onclick="onSubmitPress()">Submit</button>
+        <button id="clear" onclick="onClearPress()">Clear</button>
+    </div>
+    </form>
+    <table id="contactstable">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Phone Number</th>
+                <th>Email Address</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="tablerows">
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
